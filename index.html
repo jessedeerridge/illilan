@@ -1,9 +1,9 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>テンプレ</title>
+<title>ILL-ILLAN(イル-イラン)</title>
 <style>
   html, body{height:100%; overflow:hidden;}
   body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#fff;color:#111;}
@@ -20,7 +20,6 @@
   #lobby{padding:20px;border-top:1px solid #eee; position:relative; z-index:2;}
   .copy-btn.copied, .btn.ghost.copied{background:#16a34a;color:#fff;border-color:#16a34a;}
 
-  /* ★ main背景：入室前/入室後で切替 */
   main{
     position:relative;
     height:calc(100vh - 60px);
@@ -30,13 +29,12 @@
     background-position:center;
     background-repeat:no-repeat;
   }
-  main.prejoin{ background-image:url('maemain.jpg'); }
-  main.joined{ background-image:url('maingazo.jpg'); }
+  main.prejoin{ background-image:url('illtop.jpg'); }
+  main.joined{ background-image:url('illmain.jpg'); }
 
-  /* ★ 着席ポップ */
   .seat-pop{
     position:fixed;left:50%;bottom:10px;transform:translateX(-50%);
-    background:orange;border:1px solid #eee;border-radius:12px;
+    background:red;border:1px solid #eee;border-radius:12px;
     box-shadow:0 12px 28px rgba(0,0,0,.12);
     padding:10px;z-index:220;display:flex;flex-direction:column;gap:10px;min-width:280px;
   }
@@ -49,7 +47,6 @@
   .tab.disabled::after{content:'✕';position:absolute;inset:0;display:grid;place-items:center;font-size:18px;font-weight:700;color:#b91c1c;pointer-events:none;}
   .tab.active{background:#111;color:#fff;border-color:#111;}
 
-  /* ★ ホスト人数選択中：参加者に出す黒ポップ（下固定） */
   .host-selecting-pop{
     position:fixed;left:50%;bottom:10px;transform:translateX(-50%);
     background:rgba(20,20,20,.92);color:#fff;
@@ -60,7 +57,6 @@
   }
   .host-selecting-pop.hidden{display:none;}
 
-  /* ★ プレイヤー円配置用 */
   .player-circle{
     position:relative;width:260px;height:260px;
     margin:20px auto 0;border-radius:50%;
@@ -75,32 +71,118 @@
   }
   .player-tag.me{ background:#111;color:#fff;border-color:#111; }
 
-  /* ============================================
-     ★ 他プレイヤーのミニカード（ネームタグの上に扇状）
-     ============================================ */
+  .player-tag.other-turn{
+    width:56px;
+    height:56px;
+    padding:0;
+    border-radius:50%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    white-space:normal;
+    line-height:1.05;
+  }
+  .player-tag.other-turn .turn-name{
+    font-weight:800;
+    font-size:12px;
+    line-height:1.05;
+  }
+  .player-tag.other-turn .turn-dots{
+    margin-top:3px;
+    font-size:12px;
+    line-height:1.0;
+  }
+  .player-tag.other-turn .turn-dash{
+    margin-top:2px;
+    font-size:12px;
+    line-height:1.0;
+  }
+
+  .vote-wrap{
+    position:absolute;
+    left:50%;
+    top:100%;
+    transform:translate(-50%,8px);
+    display:flex;
+    gap:10px;
+    z-index:6;
+    pointer-events:auto;
+  }
+  .vote-btn{
+    width:70px;height:70px;
+    border-radius:50%;
+    border:none;
+    padding:0;
+    cursor:pointer;
+    background:#fff;
+    background-size:cover;
+    background-position:center;
+    box-shadow:0 10px 22px rgba(0,0,0,.18);
+    touch-action:manipulation;
+  }
+  .vote-btn.good{ background-image:url('iru.png'); }
+  .vote-btn.bad{  background-image:url('iran.png'); }
+
+  .vote-wrap.pulsing .vote-btn{
+    animation: votePulse .95s ease-in-out infinite;
+    transform-origin:center center;
+  }
+  @keyframes votePulse{
+    0%{ transform:scale(0.92); }
+    50%{ transform:scale(1.08); }
+    100%{ transform:scale(0.92); }
+  }
+
+  .vote-wrap.locked .vote-btn{ animation:none !important; }
+  .vote-btn.faded{ opacity:.28; }
+  .vote-btn.selected{ opacity:1; }
+
+  .vote-indicator{
+    position:absolute;
+    width:50px;height:50px;
+    border-radius:50%;
+    border:none;
+    background:#fff;
+    background-size:cover;
+    background-position:center;
+    box-shadow:0 12px 28px rgba(0,0,0,.22);
+    pointer-events:none;
+    z-index:90;
+    transform:translate(-50%,-50%);
+  }
+  .vote-indicator.good{ background-image:url('iru.png'); }
+  .vote-indicator.bad{  background-image:url('iran.png'); }
+
   .player-tag .mini-hand{
     position:absolute;
     left:50%;
     bottom:100%;
-    transform: translate(-50%,12px) scale(1.5);
+    transform: translate(-50%,30px) scale(1.5);
     transform-origin: bottom center;
     width:96px;height:54px;
     pointer-events:none;
+  }
+
+  .card-front{
+    background:#d11;
+    color:#fff;
+    border:1px solid rgba(0,0,0,.18);
   }
 
   .player-tag .mini-card{
     position:absolute;left:50%;top:0;
     width:28px;height:40px;
     border-radius:8px;
-    border:1px solid rgba(0,0,0,.18);
-    background:#fff;
-    font-size:14px;font-weight:900;
+    font-size:21px;font-weight:900;
     display:flex;align-items:center;justify-content:center;
     transform-origin:bottom center;
     box-shadow:0 10px 22px rgba(0,0,0,.18);
+    background:#d11;color:#fff;border:1px solid rgba(0,0,0,.18);
+    overflow:hidden;
   }
 
-  /* ★ dfinger.png（手札が1枚以上あるとき、右下に表示） */
   .player-tag .mini-hand .hand-finger{
     position:absolute;
     right:15px;
@@ -112,60 +194,92 @@
     z-index:100;
   }
 
-  /* =========================
-     ★ ミニカードエリア（枠＆塗りつぶしを全部消す）
-     - 通常時：border/background/box-shadow/afterも無し
-     - ドラッグ中：自分のカードのときだけ薄い水色でヒント
-     ========================= */
   .mini-zone{
     position:absolute;
     left:50%; top:50%;
     min-width:34px;
     height:52px;
-
-    border:none;                 /* ← remove borders */
+    border:none;
     border-radius:10px;
-    background:transparent;       /* ← remove filled bg */
-    box-shadow:none;             /* ← remove shadow */
+    background:transparent;
+    box-shadow:none;
     transform-origin:center center;
-
     display:flex;
     flex-direction:row;
-    align-items:center;
+    align-items:flex-end;
     justify-content:center;
-    gap:4px;
+    gap:8px;
     padding:4px;
-
     pointer-events:auto;
+    z-index:60;
   }
-  .mini-zone::after{ content:none; } /* ← remove inner dashed */
+  .mini-zone::after{ content:none; }
 
-  .mini-zone.me{
-    border:none;
-    background:transparent;
-  }
+  body.dragging-my-card .mini-zone{ background:transparent; }
+  body.dragging-my-card .mini-zone.hint{ background:rgba(56, 189, 248, .12); }
+  body.dragging-my-card .mini-zone.hint.target{ background:rgba(56, 189, 248, .22); }
 
-  /* ★ placement hint: only while dragging my own card */
-  .mini-zone.hint{
-    outline:3px solid rgba(56, 189, 248, .70);   /* light blue */
-    outline-offset:2px;
-    background:rgba(56, 189, 248, .12);          /* subtle fill hint */
-  }
-
-  /* zone-card is unchanged (your placed mini cards still look like cards) */
   .zone-card{
-    width:28px;height:40px;border-radius:8px;border:1px solid rgba(0,0,0,.18);
-    background:#fff;
+    width:28px;height:40px;border-radius:8px;
+    background:#d11;color:#fff;
+    border:1px solid rgba(0,0,0,.18);
     display:flex;align-items:center;justify-content:center;
-    font-size:14px;font-weight:900;
+    font-size:21px;font-weight:900;
     box-shadow:0 10px 22px rgba(0,0,0,.18);
     user-select:none;
     pointer-events:none;
+    position:absolute;
+    left:0;
+    bottom:0;
+    overflow:hidden;
+  }
+
+  .zone-stack{
+    position:relative;
+    width:28px;
     flex:0 0 auto;
   }
 
-  /* ★ 手札表示（大きめ横並び） */
-  .my-hand-wrapper{margin-top:16px;text-align:center;}
+  /* ===== Bomb BG (11..14) ===== */
+  .card-label-wrap{
+    position:relative;
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    pointer-events:none;
+  }
+  .card-label-wrap .bomb-bg{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    font-size:24px;
+    line-height:1;
+    opacity:.84;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,.18));
+    z-index:0;
+  }
+  .card-label-wrap .num-fg{
+    position:relative;
+    z-index:1;
+  }
+  .mini-card .card-label-wrap .bomb-bg,
+  .zone-card .card-label-wrap .bomb-bg{
+    font-size:22px;
+    opacity:.84;
+  }
+  .fly-card.front .card-label-wrap .bomb-bg{
+    font-size:30px;
+    opacity:.84;
+  }
+  .fly-card.small.front .card-label-wrap .bomb-bg{
+    font-size:24px;
+    opacity:.84;
+  }
+
+  .my-hand-wrapper{margin-top:96px;text-align:center;}
   .my-hand-title{display:none;}
   .my-hand{
     display:flex;justify-content:center;gap:8px;margin-top:6px;
@@ -173,18 +287,63 @@
     position:relative;
   }
 
-  /* ★ カード（手札） */
+  .my-hand-finger{
+    position:absolute;
+    right:-38px;
+    bottom:-14px;
+    width:56px;
+    height:auto;
+    pointer-events:none;
+    z-index:12000;
+    filter: drop-shadow(0 10px 18px rgba(0,0,0,.22));
+  }
+
+  body.dragging-my-card .my-hand-finger{ display:none !important; }
+  body.dragging-my-card .hand-finger{ display:none !important; }
+
   .my-card{
-    width:60px;height:90px;border-radius:10px;border:1px solid #ddd;background:#fff;
-    display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;
+    width:60px;height:90px;border-radius:10px;
+    border:1px solid #ddd;
     box-shadow:0 4px 12px rgba(0,0,0,.15);
     user-select:none;
     touch-action:none;
     transform-origin:center center;
+    animation:none;
+    cursor:default;
+    opacity:1;
+    position:relative;
+    overflow:hidden;
+
+    background:#fff;
+    background-image:url('illura.jpg');
+    background-size:cover;
+    background-position:center;
+    color:transparent;
+  }
+
+  .my-card .card-label{
+    position:absolute;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:24px;font-weight:800;
+    opacity:0;
+    color:#fff;
+    text-shadow:0 2px 10px rgba(0,0,0,.25);
+    pointer-events:none;
+  }
+
+  .my-card.faceup{
+    background-image:none;
+    background:#d11;
+    color:#fff;
+    border-color:rgba(0,0,0,.18);
+  }
+  .my-card.faceup .card-label{ opacity:1; }
+
+  .my-card.pulsing{
     animation: cardPulse 1.0s ease-in-out infinite;
     cursor:grab;
   }
-  .my-card:active{ cursor:grabbing; }
+  .my-card.pulsing:active{ cursor:grabbing; }
 
   @keyframes cardPulse{
     0%{ transform:scale(0.94); }
@@ -199,7 +358,6 @@
     cursor:grabbing;
   }
 
-  /* ★ 追い出し確認ダイアログ */
   .dialog-backdrop{
     position:fixed;inset:0;background:rgba(0,0,0,.35);
     display:flex;align-items:center;justify-content:center;z-index:300;
@@ -213,7 +371,6 @@
   .dialog-box p{margin:0 0 12px;font-size:14px;line-height:1.6;}
   .dialog-buttons{display:flex;justify-content:flex-end;gap:8px;}
 
-  /* ★ ホスト用 設定ボタン（右下固定） */
   .host-settings-btn{
     position:fixed;right:16px;bottom:16px;width:44px;height:44px;border-radius:50%;
     border:1px solid #ddd;background:#fff;box-shadow:0 8px 20px rgba(0,0,0,.18);
@@ -221,7 +378,6 @@
   }
   .host-settings-btn.visible{display:flex;}
 
-  /* ★ 設定ポップ（ホスト専用パネル） */
   .start-pop{
     position:fixed;right:16px;bottom:72px;background:#fff;border:1px solid #ddd;border-radius:12px;
     box-shadow:0 12px 28px rgba(0,0,0,.16);padding:10px 12px;z-index:240;min-width:260px;
@@ -233,16 +389,12 @@
   .start-pop-main{font-size:13px;line-height:1.5;}
   .start-pop-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:4px;flex-wrap:wrap;}
 
-  /* 詳細情報消す用 */
   #roomInfoLobby, #lobby h2, #lobby p {display:none;}
   #lobby.entered{
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     min-height:calc(100vh - 60px);
   }
 
-  /* =========================
-     ★ 左下「？」ボタン
-     ========================= */
   .help-btn{
     position:fixed;left:16px;bottom:16px;width:44px;height:44px;border-radius:50%;
     border:1px solid #111;background:#111;color:#fff;
@@ -252,7 +404,6 @@
   }
   .help-btn.visible{display:flex;}
 
-  /* ★ ヘルプ一覧ポップ */
   .help-pop-backdrop{
     position:fixed;inset:0;background:rgba(0,0,0,.35);
     display:flex;align-items:flex-end;justify-content:center;
@@ -273,24 +424,59 @@
   }
   .help-pop-title{font-weight:800;font-size:14px;}
   .help-pop-body{padding:12px;overflow:auto;max-height:calc(70vh - 48px);}
-  .role-row{
-    display:flex;gap:12px;align-items:flex-start;
-    padding:10px 0;
-  }
-  .role-card{
-    width:72px;height:108px;border-radius:10px;border:1px solid #ddd;background:#f8f8f8;
-    box-shadow:0 6px 16px rgba(0,0,0,.10);
-    flex:0 0 auto;
-    display:flex;align-items:center;justify-content:center;
-    font-size:12px;font-weight:700;color:#444;
-  }
-  .role-desc{flex:1 1 auto;}
-  .role-desc .name{font-weight:900;margin-bottom:4px;}
-  .role-desc .text{font-size:13px;line-height:1.55;color:#222;white-space:pre-wrap;}
 
-  /* =========================
-     ★ 中央デッキ（手札の1/2程度）
-     ========================= */
+  .help-grid{
+    display:grid;
+    grid-template-columns:repeat(4, minmax(0, 1fr));
+    gap:10px;
+  }
+  .help-card{
+    position:relative;
+    width:60px;
+    height:90px;
+    border-radius:10px;
+    border:1px solid rgba(0,0,0,.14);
+    background:#d11;
+    color:#fff;
+    box-shadow:0 10px 22px rgba(0,0,0,.14);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    user-select:none;
+  }
+  .help-card .help-label{
+    font-size:28px;
+    font-weight:900;
+    text-shadow:0 2px 10px rgba(0,0,0,.22);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+  }
+  .help-count-tag{
+    position:absolute;
+    top:-10px;
+    right:-10px;
+    padding:4px 8px;
+    border-radius:999px;
+    background:rgba(0,0,0,.72);
+    color:#fff;
+    font-size:12px;
+    font-weight:900;
+    line-height:1;
+    box-shadow:0 8px 18px rgba(0,0,0,.18);
+    pointer-events:none;
+  }
+  .help-card{ overflow:visible; }
+
+  @media (max-width: 420px){
+    .help-grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+    .help-card .help-label{ font-size:26px; }
+  }
+
   .deck-area{
     position:absolute;left:50%;top:50%;
     transform:translate(-50%,-50%);
@@ -307,47 +493,92 @@
     position:absolute;left:0;top:0;
     width:33px;height:48px;border-radius:8px;
     border:1px solid rgba(0,0,0,.25);
+
     background:#fff;
-    background-image:url('iluura.jpg');
+    background-image:url('illura.jpg');
     background-size:cover;
     background-position:center;
+
     box-shadow:0 10px 22px rgba(0,0,0,.20);
   }
-  .deck-count{
-    position:absolute;right:-8px;top:-8px;
-    min-width:22px;height:22px;padding:0 6px;
-    border-radius:999px;
-    background:#111;color:#fff;
-    border:1px solid rgba(255,255,255,.35);
+
+  .deck-count{ display:none !important; }
+
+  .fly-card{
+    position:fixed;
+    width:60px;height:90px;
+    border-radius:10px;
+    border:1px solid rgba(0,0,0,.20);
+    box-shadow:0 18px 40px rgba(0,0,0,.22);
     display:flex;align-items:center;justify-content:center;
-    font-size:11px;font-weight:900;
-    box-shadow:0 10px 22px rgba(0,0,0,.25);
+    font-size:24px;font-weight:800;
+    z-index:20000;
     pointer-events:none;
-    z-index:9999;
+    transform:translate(-50%,-50%);
+    will-change:transform, opacity;
+    overflow:hidden;
+  }
+  .fly-card.small{
+    width:33px;height:48px;
+    border-radius:8px;
+    font-size:21px;
+    font-weight:900;
+  }
+  .fly-card.front{
+    background:#d11;color:#fff;
+  }
+  .fly-card.back{
+    background:#fff;
+    background-image:url('illura.jpg');
+    background-size:cover;
+    background-position:center;
+    color:transparent;
   }
 
-  /* ★ ターンUI（不要タグを出さない） */
-  .turnbar{
-    margin-top:10px;
-    display:flex;
-    gap:8px;
-    align-items:center;
-    justify-content:center;
-    flex-wrap:wrap;
+  /* bomb marker under name tag */
+  .name-bomb{
+    position:absolute;
+    left:50%;
+    top:100%;
+    transform:translate(-50%, 4px);
+    font-size:18px;
+    line-height:1;
+    filter: drop-shadow(0 6px 10px rgba(0,0,0,.18));
+    pointer-events:none;
   }
-  .turnbadge{
-    font-size:12px;font-weight:900;
-    padding:6px 10px;border-radius:999px;
-    background:rgba(255,255,255,.75);
-    border:1px solid rgba(0,0,0,.12);
-    box-shadow:0 10px 22px rgba(0,0,0,.10);
+
+  /* faded mini area after elimination */
+  .mini-zone.bombed .zone-card{
+    opacity:.18;              /* ← もっと薄く */
+    filter:saturate(.55);
+  }
+  .player-tag.eliminated{
+    opacity:.62;
+    filter:saturate(.85);
+  }
+  .player-tag.eliminated .mini-hand{ opacity:.22; }
+  .player-tag.eliminated .mini-card{ opacity:.22; }
+
+  /* bomb scatter animation overlay */
+  .bomb-burst{
+    position:fixed;
+    left:0;top:0;
+    z-index:50000;
+    pointer-events:none;
+  }
+  .bomb-piece{
+    position:absolute;
+    left:0;top:0;
+    transform:translate(-50%,-50%);
+    will-change:transform, opacity;
+    filter: drop-shadow(0 10px 18px rgba(0,0,0,.22));
   }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>テンプレ</h1>
+  <h1>ILL-ILLAN(イル-イラン)</h1>
   <div style="display:flex;align-items:center;gap:6px;">
     <div class="small" id="roomInfo"></div>
     <button class="btn ghost" id="copyLinkBtn">COPY</button>
@@ -367,10 +598,6 @@
     <p>ここにテーブルや情報が表示されます。</p>
 
     <div id="playerCircle" class="player-circle"></div>
-
-    <div class="turnbar">
-      <div id="turnInfo" class="turnbadge">Waiting…</div>
-    </div>
 
     <div class="my-hand-wrapper">
       <div class="my-hand-title">自分のカード</div>
@@ -399,13 +626,12 @@
 </div>
 
 <button id="hostSettingsBtn" class="host-settings-btn" title="設定">⚙</button>
-
-<button id="helpBtn" class="help-btn" title="正体カード一覧">？</button>
+<button id="helpBtn" class="help-btn" title="カードリスト">？</button>
 
 <div id="helpBackdrop" class="help-pop-backdrop hidden">
-  <div class="help-pop" role="dialog" aria-modal="true" aria-label="正体カード一覧">
+  <div class="help-pop" role="dialog" aria-modal="true" aria-label="カードリスト">
     <div class="help-pop-header">
-      <div class="help-pop-title">正体カード</div>
+      <div class="help-pop-title">カードリスト</div>
       <button id="btnHelpClose" class="btn ghost" style="padding:2px 6px;font-size:12px;">×</button>
     </div>
     <div class="help-pop-body" id="helpBody"></div>
@@ -450,6 +676,237 @@ const db  = getDatabase(app);
 const savedUserId = sessionStorage.getItem('bbUserId') || crypto.randomUUID();
 sessionStorage.setItem('bbUserId', savedUserId);
 
+/* =========================
+   ★ デッキ構成
+   ========================= */
+function makeInitialDeck(){
+  const deck = [];
+  for (let n=2; n<=8; n++){
+    for (let i=0; i<n; i++) deck.push(n);
+  }
+  deck.push(11,12,13);
+  return deck;
+}
+
+/* =========================
+   scoring & bomb flow config
+   ========================= */
+const BOMB_POINT_VALUES = new Set([11,12,13]);
+const POINT_THRESHOLD = 2;
+const BOMB_ANIM_MS = 950;
+const BOMB_FADE_MS = 180;
+
+/* =========================
+   ✅ 5種類達成 → それ以外全員脱落（生存者のみ）
+   ========================= */
+const FIVE_KIND_THRESHOLD = 5;
+const WIN_ANIM_MS = 1050;
+const WIN_FADE_MS = 220;
+
+function now(){ return Date.now(); }
+function isFrozenNow(){
+  const u = state.room?.freezeUntil;
+  return (typeof u === 'number' && u > now());
+}
+function isBombed(pid){
+  return !!state.room?.bombed?.[pid];
+}
+function hasWinner(){
+  return !!state.room?.winnerId;
+}
+
+/* =========================
+   ✅ 投票の集計対象（非脱落者のみ）
+   ========================= */
+function getActivePlayers(){
+  const players = Array.isArray(latestPlayers) ? latestPlayers : [];
+  return players.filter(p => !isBombed(p.id));
+}
+function getActivePlayerIdsSet(){
+  return new Set(getActivePlayers().map(p => p.id));
+}
+
+/* =========================
+   ✅ points
+   ========================= */
+function computePointsFromPlacedList(placedList){
+  const counts = new Map();
+  for (const pc of placedList){
+    const v = pc?.value;
+    if (typeof v !== 'number') continue;
+    counts.set(v, (counts.get(v) || 0) + 1);
+  }
+
+  let points = 0;
+
+  for (const v of [11,12,13]){
+    points += (counts.get(v) || 0);
+  }
+
+  for (const [v, c] of counts.entries()){
+    points += Math.floor(c / 2);
+  }
+
+  return points;
+}
+
+/* =========================
+   ✅ 5種類（数字の種類）判定
+   ========================= */
+function countDistinctValues(placedList){
+  const setv = new Set();
+  for (const pc of placedList){
+    const v = pc?.value;
+    if (typeof v === 'number') setv.add(v);
+  }
+  return setv.size;
+}
+
+/* =========================
+   bomb scatter animation
+   ========================= */
+function getNameBombAnchorRect(pid){
+  const tag = playerCircle.querySelector(`.player-tag[data-player-id="${pid}"]`);
+  if (!tag) return null;
+  const r = tag.getBoundingClientRect();
+  const x = r.left + r.width/2;
+  const y = r.bottom + 10;
+  return { x, y };
+}
+
+function playBombScatterAt({ x, y, big=false }){
+  const wrap = document.createElement('div');
+  wrap.className = 'bomb-burst';
+  document.body.appendChild(wrap);
+
+  const baseSize = big ? 30 : 24;
+  const n = 10;
+  const duration = BOMB_ANIM_MS;
+
+  const pieces = [];
+  for (let i=0;i<n;i++){
+    const p = document.createElement('div');
+    p.className = 'bomb-piece';
+    p.textContent = '💥';
+    p.style.left = `${x}px`;
+    p.style.top  = `${y}px`;
+    p.style.fontSize = `${baseSize}px`;
+    p.style.opacity = '1';
+    wrap.appendChild(p);
+    pieces.push(p);
+  }
+
+  const angles = pieces.map((_, i) => (i / n) * Math.PI * 2);
+  const distBase = big ? 92 : 78;
+
+  const start = performance.now();
+  return new Promise(resolve => {
+    function step(tNow){
+      const t = Math.max(0, Math.min(1, (tNow - start) / duration));
+      const e = 1 - Math.pow(1 - t, 3);
+
+      pieces.forEach((p, i) => {
+        const a = angles[i] + (i % 2 ? 0.18 : -0.14);
+        const dist = distBase * (0.25 + 0.9 * e);
+        const dx = Math.cos(a) * dist;
+        const dy = Math.sin(a) * dist - (22 * e);
+        const s  = (big ? 1.08 : 1.0) * (1 - 0.25*t);
+        p.style.transform = `translate(-50%,-50%) translate(${dx}px, ${dy}px) scale(${s}) rotate(${(i*22)*e}deg)`;
+        p.style.opacity = String(1 - 0.95*t);
+      });
+
+      if (t < 1){
+        requestAnimationFrame(step);
+      } else {
+        wrap.remove();
+        resolve();
+      }
+    }
+    requestAnimationFrame(step);
+  });
+}
+
+async function playBombForPlayer(pid){
+  const anchor = getNameBombAnchorRect(pid);
+  if (!anchor) {
+    await new Promise(r => setTimeout(r, BOMB_ANIM_MS));
+    return;
+  }
+  const big = (pid === state.userId);
+  await playBombScatterAt({ x: anchor.x, y: anchor.y, big });
+}
+
+/* =========================
+   ✅ Win Events (5種類達成で全員爆発)
+   ========================= */
+let winEventsInitialized = false;
+let lastWinEventKeys = new Set();
+const animatedWinEvents = new Set();
+
+function subscribeWinEvents(){
+  const wRef = ref(db, `rooms/${state.roomCode}/winEvents`);
+  onValue(wRef, async snap => {
+    const next = snap.val() || {};
+    const newKeys = new Set();
+    const newItems = [];
+
+    for (const [k, ev] of Object.entries(next)){
+      if (!ev || !ev.winnerId || typeof ev.at !== 'number') continue;
+      newKeys.add(k);
+      if (winEventsInitialized && !lastWinEventKeys.has(k)){
+        newItems.push({ key:k, ev });
+      }
+    }
+
+    if (winEventsInitialized && newItems.length){
+      for (const { key, ev } of newItems){
+        if (animatedWinEvents.has(key)) continue;
+        animatedWinEvents.add(key);
+
+        const losers = Array.isArray(ev.eliminatedIds) ? ev.eliminatedIds : [];
+        // ✅ 同時に爆発
+        await Promise.all(losers.map(pid => playBombForPlayer(pid)));
+      }
+    }
+
+    winEventsInitialized = true;
+    lastWinEventKeys = newKeys;
+  });
+}
+
+/* bombEvents subscription */
+let bombEventsInitialized = false;
+let lastBombEventKeys = new Set();
+const animatedBombEvents = new Set();
+
+function subscribeBombEvents(){
+  const bRef = ref(db, `rooms/${state.roomCode}/bombEvents`);
+  onValue(bRef, async snap => {
+    const next = snap.val() || {};
+    const newKeys = new Set();
+    const newItems = [];
+
+    for (const [k, ev] of Object.entries(next)){
+      if (!ev || !ev.playerId || typeof ev.at !== 'number') continue;
+      newKeys.add(k);
+      if (bombEventsInitialized && !lastBombEventKeys.has(k)){
+        newItems.push({ key:k, ev });
+      }
+    }
+
+    if (bombEventsInitialized && newItems.length){
+      for (const { key, ev } of newItems){
+        if (animatedBombEvents.has(key)) continue;
+        animatedBombEvents.add(key);
+        await playBombForPlayer(ev.playerId);
+      }
+    }
+
+    bombEventsInitialized = true;
+    lastBombEventKeys = newKeys;
+  });
+}
+
 const state = {
   userId: savedUserId,
   userName: null,
@@ -460,12 +917,15 @@ const state = {
   room: {},
   placedCards: {},
 
-  deck: [2,3,4,5,6,7,8],
+  deck: makeInitialDeck(),
 
   turn: { playerId: null, phase: 'draw' },
   turnOrder: [],
 
   autoDrawRunning: false,
+
+  myVote: null,
+  votes: {}
 };
 
 const mainEl = document.getElementById('main');
@@ -504,37 +964,279 @@ const helpBackdrop = document.getElementById('helpBackdrop');
 const btnHelpClose = document.getElementById('btnHelpClose');
 const helpBody = document.getElementById('helpBody');
 
-const turnInfo = document.getElementById('turnInfo');
+/* =========================
+   アニメ補助
+   ========================= */
+function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+function getCenterRect(el){
+  const r = el.getBoundingClientRect();
+  return { x: r.left + r.width/2, y: r.top + r.height/2, w:r.width, h:r.height };
+}
+function easeOutCubic(t){ return 1 - Math.pow(1-t, 3); }
 
-const ROLE_HELP = [
-  { name: "カード1", text: "ああああ" },
-  { name: "カード2", text: "いいいい" },
-  { name: "カード3", text: "うううう" },
-  { name: "カード4", text: "うううう" },
-];
+/* 11,12,13,14 表示 */
+function isBombCard(v){
+  return v === 11 || v === 12 || v === 13 || v === 14;
+}
+function makeCardLabelNode(v){
+  const wrap = document.createElement('span');
+  wrap.className = 'card-label-wrap';
+
+  const num = document.createElement('span');
+  num.className = 'num-fg';
+  num.textContent = String(v);
+
+  if (isBombCard(v)){
+    const bomb = document.createElement('span');
+    bomb.className = 'bomb-bg';
+    bomb.textContent = '💣';
+    wrap.appendChild(bomb);
+  }
+  wrap.appendChild(num);
+  return wrap;
+}
+function setCardLabelInto(el, v){
+  el.textContent = '';
+  el.appendChild(makeCardLabelNode(v));
+}
+
+function animateFlyCard({ fromEl, toEl, label, small=false, duration=360, bump=0.05, back=false }){
+  if (!fromEl || !toEl) return Promise.resolve();
+
+  const from = getCenterRect(fromEl);
+  const to   = getCenterRect(toEl);
+
+  const fly = document.createElement('div');
+  fly.className = 'fly-card' + (small ? ' small' : '') + (back ? ' back' : ' front');
+
+  if (back){
+    fly.textContent = '';
+  } else {
+    setCardLabelInto(fly, (label != null ? Number(label) : label));
+  }
+
+  document.body.appendChild(fly);
+
+  fly.style.left = `${from.x}px`;
+  fly.style.top  = `${from.y}px`;
+
+  const startScale = small ? 1.0 : 0.98;
+  const endScale   = small ? 1.05 : 1.02;
+
+  const start = performance.now();
+  return new Promise(resolve => {
+    function step(now){
+      const t = clamp((now - start)/duration, 0, 1);
+      const e = easeOutCubic(t);
+
+      const x = from.x + (to.x - from.x) * e;
+      const y = from.y + (to.y - from.y) * e;
+
+      const s = startScale + (endScale - startScale) * e;
+
+      const extra = (t > 0.7) ? (Math.sin((t-0.7)/0.3 * Math.PI) * bump) : 0;
+      const scale = s + extra;
+
+      fly.style.left = `${x}px`;
+      fly.style.top  = `${y}px`;
+      fly.style.transform = `translate(-50%,-50%) scale(${scale})`;
+      fly.style.opacity = String(1 - (t>0.92 ? (t-0.92)/0.08 : 0));
+
+      if (t < 1){
+        requestAnimationFrame(step);
+      } else {
+        fly.remove();
+        resolve();
+      }
+    }
+    requestAnimationFrame(step);
+  });
+}
+
+function getDeckTopEl(){
+  const stack = playerCircle.querySelector('.deck-stack');
+  if (!stack) return null;
+  const cards = stack.querySelectorAll('.deck-card');
+  return cards?.[cards.length-1] || stack;
+}
+function getMyHandTargetEl(){
+  const last = myHandEl.querySelector('.my-card:last-child');
+  return last || myHandEl;
+}
+function getDrawTargetElForPlayer(pid){
+  if (pid === state.userId){
+    return getMyHandTargetEl();
+  }
+  const tag = playerCircle.querySelector(`.player-tag[data-player-id="${pid}"]`);
+  return tag || playerCircle;
+}
+
+/* placedCards差分検出 */
+let placedInitialized = false;
+let lastPlacedKeys = new Set();
+
+/* drawEvents差分検出 */
+let drawEventsInitialized = false;
+let lastDrawEventKeys = new Set();
+const animatedDrawEvents = new Set();
+
+/* ドラッグ状態 */
+let drag = { active:false, cardEl:null, value:null, sourceIndex:null, offsetX:0, offsetY:0, startX:0, startY:0 };
+let miniZonesByPlayerId = new Map();
+
+/* =========================
+   ✅ 投票 → ドラッグ解禁判定＆ドロップ先制御
+   （非脱落者のみで判定）
+   ========================= */
+function getVoteChoice(pid){
+  const v = state.votes?.[pid]?.choice;
+  return (v === 'good' || v === 'bad') ? v : null;
+}
+
+function allActivePlayersExceptMeVoted(){
+  const active = getActivePlayers();
+  const others = active.filter(p => p.id !== state.userId).map(p => p.id);
+  if (!others.length) return true;
+  return others.every(pid => !!getVoteChoice(pid));
+}
+
+function getEligibleDropPlayerIds(){
+  const active = getActivePlayers();
+  if (!active.length) return new Set();
+
+  if (!allActivePlayersExceptMeVoted()) return new Set();
+
+  const activeIds = new Set(active.map(p => p.id));
+  const meActive = activeIds.has(state.userId);
+
+  const others = active.filter(p => p.id !== state.userId).map(p => p.id);
+  const goodOthers = others.filter(pid => getVoteChoice(pid) === 'good');
+
+  const eligible = new Set();
+  if (meActive) eligible.add(state.userId);
+
+  if (goodOthers.length > 0){
+    for (const pid of goodOthers){
+      if (activeIds.has(pid)) eligible.add(pid);
+    }
+    return eligible;
+  }
+
+  for (const p of active) eligible.add(p.id);
+  return eligible;
+}
+
+function isMyTurn(){
+  return state.turn?.playerId && state.turn.playerId === state.userId;
+}
+
+function canDragMyHandNow(){
+  if (hasWinner()) return false;
+  if (!allActivePlayersExceptMeVoted()) return false;
+  if (!isMyTurn()) return false;
+  if (state.turn.phase !== 'place') return false;
+  if (isFrozenNow()) return false;
+  if (isBombed(state.userId)) return false;
+
+  const eligible = getEligibleDropPlayerIds();
+  return eligible.size > 0;
+}
+
+function applyHintZonesDuringDrag(){
+  const eligible = getEligibleDropPlayerIds();
+  for (const [pid, z] of miniZonesByPlayerId.entries()){
+    z.classList.toggle('hint', eligible.has(pid));
+  }
+}
+function clearHintZones(){
+  for (const z of miniZonesByPlayerId.values()){
+    z.classList.remove('hint','target');
+  }
+}
+
+/* 投票選択 */
+async function chooseMyVote(choice){
+  if (hasWinner()) return;
+  if (isMyTurn()) return;
+  if (!state.roomCode) return;
+  if (isBombed(state.userId)) return;
+
+  state.myVote = choice;
+  if (latestPlayers.length) renderPlayerCircle(latestPlayers);
+
+  await set(ref(db, `rooms/${state.roomCode}/votes/${state.userId}`), {
+    choice,
+    at: Date.now()
+  });
+}
+
+/* 投票購読 */
+function subscribeVotes(){
+  const votesRef = ref(db, `rooms/${state.roomCode}/votes`);
+  onValue(votesRef, snap => {
+    state.votes = snap.val() || {};
+
+    const me = state.votes?.[state.userId];
+    state.myVote = (me && (me.choice === 'good' || me.choice === 'bad')) ? me.choice : null;
+
+    renderHands();
+    if (latestPlayers.length) renderPlayerCircle(latestPlayers);
+  });
+}
+
+/* ターン切替のたびに votes をリセット（ホストが実行） */
+let prevTurnPlayerIdForVoteReset = null;
+async function resetVotesIfTurnSwitched(nextTurnPlayerId){
+  if (!state.roomCode) return;
+
+  const switched = (prevTurnPlayerIdForVoteReset !== null && prevTurnPlayerIdForVoteReset !== nextTurnPlayerId);
+  prevTurnPlayerIdForVoteReset = nextTurnPlayerId;
+
+  if (!switched) return;
+
+  if (state.isHost){
+    await remove(ref(db, `rooms/${state.roomCode}/votes`));
+  }
+}
+
+/* Help */
+function getDeckCounts(){
+  const deck = makeInitialDeck();
+  const map = new Map();
+  for (const v of deck){
+    map.set(v, (map.get(v) || 0) + 1);
+  }
+  const values = Array.from(map.keys()).sort((a,b)=>a-b);
+  return values.map(v => ({ value:v, count: map.get(v) || 0 }));
+}
 
 function renderHelpList(){
   helpBody.innerHTML = '';
-  ROLE_HELP.forEach((r, idx) => {
-    const row = document.createElement('div');
-    row.className = 'role-row';
 
+  const grid = document.createElement('div');
+  grid.className = 'help-grid';
+
+  const items = getDeckCounts();
+  items.forEach(({value, count}) => {
     const card = document.createElement('div');
-    card.className = 'role-card';
-    card.textContent = `CARD ${idx+1}`;
+    card.className = 'help-card';
 
-    const desc = document.createElement('div');
-    desc.className = 'role-desc';
-    desc.innerHTML = `
-      <div class="name">${r.name}</div>
-      <div class="text">${r.text}</div>
-    `;
+    const tag = document.createElement('div');
+    tag.className = 'help-count-tag';
+    tag.textContent = `×${count}`;
 
-    row.appendChild(card);
-    row.appendChild(desc);
-    helpBody.appendChild(row);
+    const label = document.createElement('div');
+    label.className = 'help-label';
+    setCardLabelInto(label, value);
+
+    card.appendChild(tag);
+    card.appendChild(label);
+    grid.appendChild(card);
   });
+
+  helpBody.appendChild(grid);
 }
+
 function openHelp(){
   renderHelpList();
   helpBackdrop.classList.remove('hidden');
@@ -554,19 +1256,6 @@ let pendingSeatIndexToSteal = null;
 let pendingSeatPlayerIdToSteal = null;
 let isRenderingSeatTabs = false;
 let latestPlayers = [];
-
-/* ★ ドラッグ状態 */
-let drag = {
-  active:false,
-  cardEl:null,
-  value:null,
-  sourceIndex:null,
-  offsetX:0,
-  offsetY:0,
-  startX:0,
-  startY:0,
-};
-let miniZonesByPlayerId = new Map();
 
 function generateRoomCode(length = 6){
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -594,7 +1283,8 @@ async function restoreSeatFromDB(){
 function refreshRoomLabels(){
   if (!state.roomCode || !state.userName) return;
   const label = state.isHost ? '（ホスト）' : '';
-  const infoText = ` ${state.roomCode},  ${state.userName}${label}`;
+  const win = state.room?.winnerId ? '（決着）' : '';
+  const infoText = ` ${state.roomCode},  ${state.userName}${label}${win}`;
   roomInfo.textContent = infoText;
   roomInfoLobby.textContent = infoText;
 }
@@ -615,8 +1305,10 @@ function subscribeRoom(){
     state.room = snap.val() || {};
     const waiting = (!state.isHost && !state.room.maxPlayers);
     hostSelectingPop.classList.toggle('hidden', !waiting);
+    refreshRoomLabels();
     syncSeatUI();
     renderTurnUI();
+    if (latestPlayers.length) renderPlayerCircle(latestPlayers);
   });
 }
 function subscribeHostState(){
@@ -636,13 +1328,203 @@ function subscribeHands(){
     renderHands();
   });
 }
-function subscribePlacedCards(){
-  const placedRef = ref(db, `rooms/${state.roomCode}/placedCards`);
-  onValue(placedRef, snap => {
-    state.placedCards = snap.val() || {};
-    if (latestPlayers.length) renderPlayerCircle(latestPlayers);
+
+function subscribeDrawEvents(){
+  const drawRef = ref(db, `rooms/${state.roomCode}/drawEvents`);
+  onValue(drawRef, async snap => {
+    const next = snap.val() || {};
+
+    const newKeys = new Set();
+    const newItems = [];
+
+    for (const [k, ev] of Object.entries(next)){
+      if (!ev || typeof ev.value !== 'number' || !ev.playerId) continue;
+      newKeys.add(k);
+      if (drawEventsInitialized && !lastDrawEventKeys.has(k)){
+        newItems.push({ key:k, ev });
+      }
+    }
+
+    if (drawEventsInitialized && newItems.length){
+      for (const it of newItems){
+        const { key, ev } = it;
+        if (animatedDrawEvents.has(key)) continue;
+        animatedDrawEvents.add(key);
+
+        await new Promise(r => requestAnimationFrame(r));
+
+        const fromEl = getDeckTopEl() || playerCircle.querySelector('.deck-area') || playerCircle;
+        const toEl = getDrawTargetElForPlayer(ev.playerId);
+
+        if (fromEl && toEl){
+          await animateFlyCard({
+            fromEl,
+            toEl,
+            label: ev.value,
+            small:false,
+            duration: 420,
+            back: true
+          });
+        }
+
+        if (ev.playerId === state.userId){
+          const myId = state.userId;
+          const handData = state.hands[myId];
+          const cards = (handData && Array.isArray(handData.cards)) ? handData.cards.slice() : [];
+          cards.push(ev.value);
+
+          await set(ref(db, `rooms/${state.roomCode}/hands/${myId}`), { cards });
+          await remove(ref(db, `rooms/${state.roomCode}/drawEvents/${key}`));
+        }
+      }
+    }
+
+    drawEventsInitialized = true;
+    lastDrawEventKeys = newKeys;
   });
 }
+
+/* =========================
+   ✅ 5種類達成：ホストだけが確定処理（winner set + 他全員 bombed + winEvents）
+   ========================= */
+async function maybeTriggerFiveKindsWinForPlayer(targetPid){
+  if (!state.roomCode) return false;
+  if (!state.isHost) return false;
+
+  // すでに勝者がいるなら何もしない
+  const winnerSnap = await get(ref(db, `rooms/${state.roomCode}/winnerId`));
+  if (winnerSnap.exists() && winnerSnap.val()) return false;
+
+  // 脱落者は対象外（念のため）
+  const bombSnap = await get(ref(db, `rooms/${state.roomCode}/bombed/${targetPid}`));
+  if (bombSnap.exists() && bombSnap.val() === true) return false;
+
+  // 置かれているカードの「種類数」を確認
+  const placedSnap = await get(ref(db, `rooms/${state.roomCode}/placedCards/${targetPid}`));
+  const placedNode = placedSnap.val() || {};
+  const placedList = normalizePlacedList(placedNode);
+  const kinds = countDistinctValues(placedList);
+
+  if (kinds < FIVE_KIND_THRESHOLD) return false;
+
+  // winnerId をトランザクションで確定（同時発火を防ぐ）
+  const winnerRef = ref(db, `rooms/${state.roomCode}/winnerId`);
+  const winRes = await runTransaction(winnerRef, (cur) => {
+    if (cur) return cur;
+    return targetPid;
+  }, { applyLocally:false });
+
+  if (!winRes.committed) return false;
+  if (winRes.snapshot?.val() !== targetPid) return false;
+
+  // 生存者（非脱落）から、勝者以外を脱落にする
+  const tablesSnap = await get(ref(db, `rooms/${state.roomCode}/tables`));
+  const tables = tablesSnap.val() || {};
+  const pids = Object.values(tables)
+    .map(t => (t && t.playerId) ? t.playerId : null)
+    .filter(Boolean);
+
+  const bombedAllSnap = await get(ref(db, `rooms/${state.roomCode}/bombed`));
+  const bombedAll = bombedAllSnap.val() || {};
+
+  const eliminated = [];
+  const writes = [];
+  for (const pid of pids){
+    if (pid === targetPid) continue;
+    if (bombedAll?.[pid]) continue; // すでに脱落済み
+    eliminated.push(pid);
+    writes.push(set(ref(db, `rooms/${state.roomCode}/bombed/${pid}`), true));
+  }
+  await Promise.all(writes);
+
+  // 全員アニメ中は操作停止（freeze）
+  const until = now() + WIN_ANIM_MS + WIN_FADE_MS;
+  await set(ref(db, `rooms/${state.roomCode}/freezeUntil`), until);
+
+  // win event を流して全クライアントで爆発演出
+  const evKey = crypto.randomUUID();
+  await set(ref(db, `rooms/${state.roomCode}/winEvents/${evKey}`), {
+    winnerId: targetPid,
+    eliminatedIds: eliminated,
+    at: now()
+  });
+
+  // ホスト側でも少し待ってから掃除（任意）
+  await new Promise(r => setTimeout(r, WIN_FADE_MS));
+  await remove(ref(db, `rooms/${state.roomCode}/freezeUntil`));
+  // イベントは残してもいいが、肥大化防止で消す
+  await remove(ref(db, `rooms/${state.roomCode}/winEvents/${evKey}`));
+
+  // ターンも止める（nullにする）
+  await set(ref(db, `rooms/${state.roomCode}/turn`), { playerId: null, phase: 'draw', drawLockBy: null });
+
+  return true;
+}
+
+function subscribePlacedCards(){
+  const placedRef = ref(db, `rooms/${state.roomCode}/placedCards`);
+  onValue(placedRef, async snap => {
+    const next = snap.val() || {};
+
+    const newKeys = new Set();
+    const newItems = [];
+
+    for (const [targetPid, node] of Object.entries(next)){
+      if (node && typeof node === 'object'){
+        for (const [k, pc] of Object.entries(node)){
+          if (!pc || typeof pc.value !== 'number') continue;
+          newKeys.add(`${targetPid}:${k}`);
+          if (placedInitialized && !lastPlacedKeys.has(`${targetPid}:${k}`)){
+            newItems.push({ targetPid, key:k, pc });
+          }
+        }
+      }
+    }
+
+    state.placedCards = next;
+    if (latestPlayers.length) renderPlayerCircle(latestPlayers);
+
+    if (placedInitialized && newItems.length){
+      for (const it of newItems){
+        const pc = it.pc;
+
+        // (演出) 他人の移動だけ飛ばす
+        if (pc.placedBy !== 'system' && pc.placedBy !== state.userId){
+          const fromPid = pc.placedBy;
+          const targetPid = it.targetPid;
+
+          const fromTag = playerCircle.querySelector(`.player-tag[data-player-id="${fromPid}"]`);
+          const toZone  = miniZonesByPlayerId.get(targetPid);
+
+          let fromEl = null;
+          if (fromTag){
+            const miniHand = fromTag.querySelector('.mini-hand');
+            const lastMini = miniHand?.querySelector('.mini-card:last-child');
+            fromEl = lastMini || miniHand || fromTag;
+          }
+          if (fromEl && toZone){
+            await animateFlyCard({
+              fromEl,
+              toEl: toZone,
+              label: pc.value,
+              small:true,
+              duration: 320,
+              back: false
+            });
+          }
+        }
+
+        // ✅ 新しく置かれた瞬間に「5種類達成」をホストが判定
+        // （placedの差分ごとに判定するので“その瞬間”で発火）
+        await maybeTriggerFiveKindsWinForPlayer(it.targetPid);
+      }
+    }
+
+    placedInitialized = true;
+    lastPlacedKeys = newKeys;
+  });
+}
+
 function subscribeDeck(){
   const deckRef = ref(db, `rooms/${state.roomCode}/deck`);
   onValue(deckRef, snap => {
@@ -652,19 +1534,35 @@ function subscribeDeck(){
     renderTurnUI();
   });
 }
+
 function subscribeTurn(){
   const turnRef = ref(db, `rooms/${state.roomCode}/turn`);
   onValue(turnRef, async snap => {
     const t = snap.val() || { playerId:null, phase:'draw' };
-    state.turn = { playerId: t.playerId || null, phase: t.phase || 'draw', drawLockBy: t.drawLockBy || null };
+    const nextPlayerId = t.playerId || null;
+
+    state.turn = { playerId: nextPlayerId, phase: t.phase || 'draw', drawLockBy: t.drawLockBy || null };
+
+    await resetVotesIfTurnSwitched(nextPlayerId);
+
+    if (isMyTurn()){
+      state.myVote = null;
+    }
 
     renderTurnUI();
+    renderHands();
+    if (latestPlayers.length) renderPlayerCircle(latestPlayers);
+
+    if (hasWinner()) return;
 
     if (isMyTurn() && state.turn.phase === 'draw'){
-      await autoDrawOneCard();
+      if (!isFrozenNow() && !isBombed(state.userId)){
+        await autoDrawOneCard();
+      }
     }
   });
 }
+
 function subscribeTurnOrder(){
   const orderRef = ref(db, `rooms/${state.roomCode}/turnOrder`);
   onValue(orderRef, snap => {
@@ -676,24 +1574,41 @@ function subscribeTurnOrder(){
 
 function renderMyHand(){
   myHandEl.innerHTML = '';
+
   const myId = state.userId;
   const handData = state.hands[myId];
-  if (!handData || !Array.isArray(handData.cards)) return;
+  const cardsArr = (handData && Array.isArray(handData.cards)) ? handData.cards : [];
+  if (!cardsArr) return;
 
-  handData.cards.forEach((v, idx) => {
+  const dragEnabled = canDragMyHandNow();
+
+  cardsArr.forEach((v, idx) => {
     const card = document.createElement('div');
-    card.className = 'my-card';
-    card.textContent = v;
+    card.className = 'my-card' + (dragEnabled ? ' pulsing' : '');
+    card.dataset.value = String(v);
+
+    const label = document.createElement('span');
+    label.className = 'card-label';
+    setCardLabelInto(label, v);
+    card.appendChild(label);
 
     card.addEventListener('pointerdown', (e) => {
       if (!state.roomCode) return;
-      if (!isMyTurn()) return;
-      if (state.turn.phase !== 'place') return;
+      if (!canDragMyHandNow()) return;
       startDrag(e, card, v, idx);
     });
 
     myHandEl.appendChild(card);
   });
+
+  if (!hasWinner() && isMyTurn() && cardsArr.length >= 1){
+    const finger = document.createElement('img');
+    finger.className = 'my-hand-finger';
+    finger.src = 'bfinger.png';
+    finger.alt = '';
+    finger.draggable = false;
+    myHandEl.appendChild(finger);
+  }
 }
 
 function renderHands(){
@@ -726,32 +1641,11 @@ function renderDeck(){
     stack.appendChild(c);
   }
 
-  const badge = document.createElement('div');
-  badge.className = 'deck-count';
-  badge.textContent = String(count);
-  stack.appendChild(badge);
-
   deckArea.appendChild(stack);
   playerCircle.appendChild(deckArea);
 }
 
-function isMyTurn(){
-  return state.turn?.playerId && state.turn.playerId === state.userId;
-}
-function getPlayerNameById(pid){
-  const p = latestPlayers.find(x => x.id === pid);
-  return p?.name || (pid ? 'Player' : '—');
-}
 function renderTurnUI(){
-  const pid = state.turn?.playerId || null;
-
-  if (!pid){
-    turnInfo.textContent = 'Waiting…';
-  } else {
-    const name = getPlayerNameById(pid);
-    turnInfo.textContent = `${name}`;
-  }
-
   renderDeck();
 }
 
@@ -798,12 +1692,16 @@ btnJoin.addEventListener('click', async () => {
   subscribeDeck();
   subscribeTurn();
   subscribeTurnOrder();
+  subscribeDrawEvents();
+  subscribeVotes();
+  subscribeBombEvents();
+  subscribeWinEvents();   // ✅ 追加：勝利（全員爆発）イベント購読
 
   if (state.isHost){
     const deckRef = ref(db, `rooms/${state.roomCode}/deck`);
     const dSnap = await get(deckRef);
     if (!dSnap.exists()){
-      await set(deckRef, [2,3,4,5,6,7,8]);
+      await set(deckRef, makeInitialDeck());
     }
   }
 
@@ -937,6 +1835,7 @@ function subscribePlayers(){
 
     await syncSeatUI();
     renderPlayerCircle(players);
+    renderHands();
     renderTurnUI();
   });
 }
@@ -959,6 +1858,54 @@ function normalizePlacedList(node){
   return [];
 }
 
+function escapeHTML(s){
+  return String(s).replace(/[&<>"']/g, (m) => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[m]));
+}
+
+function renderPlacedIntoZone(zone, placedList){
+  zone.innerHTML = '';
+
+  const order = [];
+  const groups = new Map();
+  for (const pc of placedList){
+    const v = pc.value;
+    if (!groups.has(v)){
+      groups.set(v, []);
+      order.push(v);
+    }
+    groups.get(v).push(pc);
+  }
+
+  const STACK_OFFSET = 8;
+  const CARD_H = 40;
+
+  for (const v of order){
+    const arr = groups.get(v) || [];
+    const stack = document.createElement('div');
+    stack.className = 'zone-stack';
+    stack.style.height = `${CARD_H + Math.max(0, arr.length - 1) * STACK_OFFSET}px`;
+
+    arr.forEach((pc, i) => {
+      const zc = document.createElement('div');
+      zc.className = 'zone-card';
+      setCardLabelInto(zc, pc.value);
+
+      const dy = i * STACK_OFFSET;
+      zc.style.transform = `translateY(${-dy}px)`;
+      zc.style.zIndex = String(10 + i);
+
+      stack.appendChild(zc);
+    });
+
+    zone.appendChild(stack);
+  }
+}
+
+/* =========================
+   ✅ render
+   ========================= */
 function renderPlayerCircle(players){
   playerCircle.innerHTML = '';
   miniZonesByPlayerId.clear();
@@ -979,9 +1926,32 @@ function renderPlayerCircle(players){
 
     const tag = document.createElement('div');
     tag.className = 'player-tag' + (p.id === state.userId ? ' me' : '');
-    tag.textContent = p.name;
     tag.style.left = `${x}%`;
     tag.style.top = `${y}%`;
+    tag.dataset.playerId = p.id;
+
+    if (isBombed(p.id)) tag.classList.add('eliminated');
+
+    const isOther = (p.id !== state.userId);
+    const isTheirTurn = (state.turn?.playerId && state.turn.playerId === p.id);
+
+    if (isOther && isTheirTurn){
+      tag.classList.add('other-turn');
+      tag.innerHTML = `
+        <div class="turn-name">${escapeHTML(p.name)}</div>
+        <div class="turn-dots">・　・</div>
+        <div class="turn-dash">-</div>
+      `;
+    } else {
+      tag.textContent = p.name;
+    }
+
+    if (isBombed(p.id)){
+      const b = document.createElement('div');
+      b.className = 'name-bomb';
+      b.textContent = '💣';
+      tag.appendChild(b);
+    }
 
     tag.onclick = () => {
       if (p.id === state.userId) return;
@@ -1006,7 +1976,7 @@ function renderPlayerCircle(players){
       handData.cards.forEach((v, idx2) => {
         const card = document.createElement('div');
         card.className = 'mini-card';
-        card.textContent = String(v);
+        setCardLabelInto(card, v);
 
         const angleDeg = (count > 1) ? base + (spread/(count-1))*idx2 : 0;
         const lift = Math.abs(angleDeg) * 0.15;
@@ -1023,6 +1993,48 @@ function renderPlayerCircle(players){
       miniHand.appendChild(finger);
 
       tag.appendChild(miniHand);
+    }
+
+    // ✅ 自分のvoteボタン：脱落したら出さない / 決着後も出さない
+    if (!hasWinner() && p.id === state.userId && !isMyTurn() && !isBombed(state.userId)){
+      const active = getActivePlayers();
+      const activeOthersCount = active.filter(pp => pp.id !== state.userId).length;
+
+      if (activeOthersCount > 0){
+        const wrap = document.createElement('div');
+        const locked = !!state.myVote;
+        wrap.className = 'vote-wrap ' + (locked ? 'locked' : 'pulsing');
+
+        const good = document.createElement('button');
+        good.type = 'button';
+        good.className = 'vote-btn good';
+        good.setAttribute('aria-label', 'Good');
+        good.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          await chooseMyVote('good');
+        });
+
+        const bad = document.createElement('button');
+        bad.type = 'button';
+        bad.className = 'vote-btn bad';
+        bad.setAttribute('aria-label', 'Bad');
+        bad.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          await chooseMyVote('bad');
+        });
+
+        if (state.myVote === 'good'){
+          good.classList.add('selected');
+          bad.classList.add('faded');
+        } else if (state.myVote === 'bad'){
+          bad.classList.add('selected');
+          good.classList.add('faded');
+        }
+
+        wrap.appendChild(good);
+        wrap.appendChild(bad);
+        tag.appendChild(wrap);
+      }
     }
 
     playerCircle.appendChild(tag);
@@ -1053,30 +2065,65 @@ function renderPlayerCircle(players){
     const inwardDeg = (Math.atan2(uy, ux) * 180/Math.PI) + 90;
 
     const zone = document.createElement('div');
-    zone.className = 'mini-zone' + (p.id === state.userId ? ' me' : '');
+    zone.className = 'mini-zone';
     zone.dataset.playerId = p.id;
+
+    if (isBombed(p.id)) zone.classList.add('bombed');
 
     zone.style.left = `${localLeft}px`;
     zone.style.top  = `${localTop}px`;
     zone.style.transform = `translate(-50%,-50%) rotate(${inwardDeg}deg)`;
 
-    // keep pointer events for hit test, but DO NOT add hover outline anymore
-    zone.addEventListener('pointerenter', () => {});
-    zone.addEventListener('pointerleave', () => {});
-
     const placedNode = state.placedCards?.[p.id];
     const placedList = normalizePlacedList(placedNode);
 
-    placedList.forEach((pc) => {
-      const zc = document.createElement('div');
-      zc.className = 'zone-card';
-      zc.textContent = String(pc.value);
-      zone.appendChild(zc);
-    });
+    renderPlacedIntoZone(zone, placedList);
 
     playerCircle.appendChild(zone);
     miniZonesByPlayerId.set(p.id, zone);
   });
+
+  // ✅ 投票結果アイコン：脱落者は集計対象外なので表示もしない / 決着後も不要
+  if (!hasWinner()){
+    const activeIds = getActivePlayerIdsSet();
+
+    players.forEach((p, idx) => {
+      if (p.id === state.userId) return;
+      if (!activeIds.has(p.id)) return;
+
+      const v = state.votes?.[p.id];
+      const choice = v?.choice;
+      if (choice !== 'good' && choice !== 'bad') return;
+
+      const k = (meIndex === -1) ? idx : (idx - meIndex + n) % n;
+      const angle = anchorAngle + step * k;
+
+      const tagXpx = rect.left + ( (50 + radius * Math.cos(angle)) / 100 ) * rect.width;
+      const tagYpx = rect.top  + ( (50 + radius * Math.sin(angle)) / 100 ) * rect.height;
+
+      const vx = (cx - tagXpx);
+      const vy = (cy - tagYpx);
+      const len = Math.hypot(vx, vy) || 1;
+      const ux = vx / len;
+      const uy = vy / len;
+
+      const zoneDist = 62;
+      const voteDist = zoneDist + 52;
+
+      const voteCx = tagXpx + ux * voteDist;
+      const voteCy = tagYpx + uy * voteDist;
+
+      const localLeft = (voteCx - rect.left);
+      const localTop  = (voteCy - rect.top);
+
+      const indi = document.createElement('div');
+      indi.className = `vote-indicator ${choice}`;
+      indi.style.left = `${localLeft}px`;
+      indi.style.top  = `${localTop}px`;
+
+      playerCircle.appendChild(indi);
+    });
+  }
 
   renderDeck();
 }
@@ -1149,11 +2196,20 @@ async function startGameDealOneEachThenExtraToStarter(){
 
   const deckRef = ref(db, `rooms/${state.roomCode}/deck`);
   const dSnap = await get(deckRef);
-  let deck = (dSnap.exists() && Array.isArray(dSnap.val())) ? dSnap.val() : [2,3,4,5,6,7,8];
+
+  let deck = (dSnap.exists() && Array.isArray(dSnap.val())) ? dSnap.val() : makeInitialDeck();
   deck = shuffle(deck);
 
   await set(ref(db, `rooms/${state.roomCode}/hands`), {});
   await remove(ref(db, `rooms/${state.roomCode}/placedCards`));
+  await remove(ref(db, `rooms/${state.roomCode}/drawEvents`));
+  await remove(ref(db, `rooms/${state.roomCode}/votes`));
+
+  await remove(ref(db, `rooms/${state.roomCode}/bombed`));
+  await remove(ref(db, `rooms/${state.roomCode}/bombEvents`));
+  await remove(ref(db, `rooms/${state.roomCode}/freezeUntil`));
+  await remove(ref(db, `rooms/${state.roomCode}/winnerId`));   // ✅ 決着リセット
+  await remove(ref(db, `rooms/${state.roomCode}/winEvents`));  // ✅ イベント掃除
 
   if (!ordered.length){
     await set(deckRef, deck);
@@ -1192,11 +2248,18 @@ async function startGameDealOneEachThenExtraToStarter(){
 
 async function autoDrawOneCard(){
   if (!state.roomCode) return;
+  if (hasWinner()) return;
   if (!isMyTurn()) return;
   if (state.turn.phase !== 'draw') return;
   if (state.autoDrawRunning) return;
 
+  if (isFrozenNow()) return;
+  if (isBombed(state.userId)) return;
+
   state.autoDrawRunning = true;
+
+  let drawn = null;
+
   try {
     const turnRef = ref(db, `rooms/${state.roomCode}/turn`);
     const lockToken = `${state.userId}:${Date.now()}`;
@@ -1211,7 +2274,6 @@ async function autoDrawOneCard(){
 
     if (!lockRes.committed) return;
 
-    let drawn = null;
     const deckRef = ref(db, `rooms/${state.roomCode}/deck`);
     const deckRes = await runTransaction(deckRef, (cur) => {
       if (!Array.isArray(cur) || cur.length <= 0) return cur;
@@ -1224,21 +2286,23 @@ async function autoDrawOneCard(){
       return;
     }
 
-    const myId = state.userId;
-    const handData = state.hands[myId];
-    const cards = (handData && Array.isArray(handData.cards)) ? handData.cards.slice() : [];
-    cards.push(drawn);
-    await set(ref(db, `rooms/${state.roomCode}/hands/${myId}`), { cards });
+    const eventKey = crypto.randomUUID();
+    await set(ref(db, `rooms/${state.roomCode}/drawEvents/${eventKey}`), {
+      playerId: state.userId,
+      value: drawn,
+      at: Date.now()
+    });
 
-    await set(turnRef, { playerId: myId, phase: 'place', drawLockBy: null });
-
+    await set(turnRef, { playerId: state.userId, phase: 'place', drawLockBy: null });
   } finally {
     state.autoDrawRunning = false;
   }
 }
 
+/* advance turn skipping bombed players */
 async function advanceTurnToNext(){
   if (!state.roomCode) return;
+  if (hasWinner()) return;
 
   const order = Array.isArray(state.turnOrder) ? state.turnOrder : [];
   if (!order.length) {
@@ -1246,10 +2310,26 @@ async function advanceTurnToNext(){
     return;
   }
 
+  const bombSnap = await get(ref(db, `rooms/${state.roomCode}/bombed`));
+  const bombed = bombSnap.val() || {};
+
   const current = state.turn?.playerId || null;
   let idx = order.indexOf(current);
   if (idx < 0) idx = 0;
-  const nextPid = order[(idx + 1) % order.length];
+
+  let tries = 0;
+  let nextPid = order[(idx + 1) % order.length];
+
+  while (tries < order.length && bombed?.[nextPid]){
+    idx = (idx + 1) % order.length;
+    nextPid = order[(idx + 1) % order.length];
+    tries++;
+  }
+
+  if (tries >= order.length && bombed?.[nextPid]){
+    await set(ref(db, `rooms/${state.roomCode}/turn`), { playerId: null, phase: 'draw', drawLockBy: null });
+    return;
+  }
 
   await set(ref(db, `rooms/${state.roomCode}/turn`), { playerId: nextPid, phase: 'draw', drawLockBy: null });
 }
@@ -1280,6 +2360,15 @@ btnResetRoom.addEventListener('click', async () => {
     remove(ref(db, `${base}/deck`)),
     remove(ref(db, `${base}/turn`)),
     remove(ref(db, `${base}/turnOrder`)),
+    remove(ref(db, `${base}/drawEvents`)),
+    remove(ref(db, `${base}/votes`)),
+
+    remove(ref(db, `${base}/bombed`)),
+    remove(ref(db, `${base}/bombEvents`)),
+    remove(ref(db, `${base}/freezeUntil`)),
+
+    remove(ref(db, `${base}/winnerId`)),
+    remove(ref(db, `${base}/winEvents`)),
   ]);
 
   state.seatedTable = null;
@@ -1287,13 +2376,60 @@ btnResetRoom.addEventListener('click', async () => {
   await syncSeatUI();
 });
 
+/* bomb trigger flow */
+async function maybeTriggerBombForPlayer(targetPid){
+  if (!state.roomCode) return false;
+
+  const bombSnap = await get(ref(db, `rooms/${state.roomCode}/bombed/${targetPid}`));
+  if (bombSnap.exists() && bombSnap.val() === true) return false;
+
+  const placedSnap = await get(ref(db, `rooms/${state.roomCode}/placedCards/${targetPid}`));
+  const placedNode = placedSnap.val() || {};
+  const placedList = normalizePlacedList(placedNode);
+  const points = computePointsFromPlacedList(placedList);
+
+  if (points < POINT_THRESHOLD) return false;
+
+  const bombedRef = ref(db, `rooms/${state.roomCode}/bombed/${targetPid}`);
+  const res = await runTransaction(bombedRef, (cur) => {
+    if (cur === true) return cur;
+    return true;
+  }, { applyLocally:false });
+
+  if (!res.committed) return false;
+  if (res.snapshot?.val() !== true) return false;
+
+  const until = now() + BOMB_ANIM_MS + BOMB_FADE_MS;
+  await set(ref(db, `rooms/${state.roomCode}/freezeUntil`), until);
+
+  const evKey = crypto.randomUUID();
+  await set(ref(db, `rooms/${state.roomCode}/bombEvents/${evKey}`), {
+    playerId: targetPid,
+    at: now()
+  });
+
+  await playBombForPlayer(targetPid);
+
+  await new Promise(r => setTimeout(r, BOMB_FADE_MS));
+
+  await remove(ref(db, `rooms/${state.roomCode}/freezeUntil`));
+  await remove(ref(db, `rooms/${state.roomCode}/bombEvents/${evKey}`));
+
+  return true;
+}
+
 /* =========================
    ドラッグ＆ドロップ
-   - hint is light-blue only while dragging my own card
    ========================= */
 function startDrag(e, cardEl, value, sourceIndex){
+  if (!canDragMyHandNow()) return;
+
   e.preventDefault();
   cardEl.setPointerCapture(e.pointerId);
+
+  document.body.classList.add('dragging-my-card');
+  clearHintZones();
+  applyHintZonesDuringDrag();
 
   const rect = cardEl.getBoundingClientRect();
   drag.active = true;
@@ -1336,11 +2472,8 @@ function moveDrag(e){
 
   const zone = getZoneUnderPointer(e.clientX, e.clientY);
 
-  // clear hints
-  for (const z of miniZonesByPlayerId.values()) z.classList.remove('hint');
-
-  // add hint to current zone (placement hint)
-  if (zone) zone.classList.add('hint');
+  for (const z of miniZonesByPlayerId.values()) z.classList.remove('target');
+  if (zone) zone.classList.add('target');
 }
 
 function getZoneUnderPointer(px, py){
@@ -1351,7 +2484,10 @@ function getZoneUnderPointer(px, py){
 
   if (!el) return null;
   const zone = el.closest?.('.mini-zone');
-  return zone || null;
+  if (!zone) return null;
+
+  if (!zone.classList.contains('hint')) return null;
+  return zone;
 }
 
 async function endDrag(e){
@@ -1365,6 +2501,8 @@ async function endDrag(e){
   const sourceIndex = drag.sourceIndex;
 
   drag.cardEl.classList.remove('dragging');
+  drag.cardEl.classList.remove('faceup');
+
   drag.cardEl.style.position = '';
   drag.cardEl.style.left = '';
   drag.cardEl.style.top = '';
@@ -1373,18 +2511,27 @@ async function endDrag(e){
   drag.cardEl.style.pointerEvents = '';
   drag.cardEl.remove();
 
-  for (const z of miniZonesByPlayerId.values()) z.classList.remove('hint');
+  document.body.classList.remove('dragging-my-card');
+  clearHintZones();
+
+  const eligible = getEligibleDropPlayerIds();
 
   const ok =
     zone &&
     state.roomCode &&
-    isMyTurn() &&
-    state.turn.phase === 'place' &&
-    !!zone.dataset.playerId;
+    canDragMyHandNow() &&
+    !!zone.dataset.playerId &&
+    eligible.has(zone.dataset.playerId);
 
   if (ok){
     const myId = state.userId;
     const targetPid = zone.dataset.playerId;
+
+    if (isBombed(targetPid)){
+      renderMyHand();
+      drag = { active:false, cardEl:null, value:null, sourceIndex:null, offsetX:0, offsetY:0, startX:0, startY:0 };
+      return;
+    }
 
     const handData = state.hands[myId];
     const cards = (handData && Array.isArray(handData.cards)) ? handData.cards.slice() : [];
@@ -1401,7 +2548,14 @@ async function endDrag(e){
       targetPlayerId: targetPid
     });
 
-    await advanceTurnToNext();
+    // ✅ まず5種類勝利を判定（ホストのみが確定処理）
+    await maybeTriggerFiveKindsWinForPlayer(targetPid);
+
+    // ✅ 勝利が起きたらターン進行も爆弾判定も停止
+    if (!hasWinner()){
+      await maybeTriggerBombForPlayer(targetPid);
+      await advanceTurnToNext();
+    }
   } else {
     renderMyHand();
   }
