@@ -326,22 +326,6 @@
     z-index:9999;
   }
 
-  /* ★ ターンUI（不要タグを出さない） */
-  .turnbar{
-    margin-top:10px;
-    display:flex;
-    gap:8px;
-    align-items:center;
-    justify-content:center;
-    flex-wrap:wrap;
-  }
-  .turnbadge{
-    font-size:12px;font-weight:900;
-    padding:6px 10px;border-radius:999px;
-    background:rgba(255,255,255,.75);
-    border:1px solid rgba(0,0,0,.12);
-    box-shadow:0 10px 22px rgba(0,0,0,.10);
-  }
 </style>
 </head>
 <body>
@@ -367,10 +351,6 @@
     <p>ここにテーブルや情報が表示されます。</p>
 
     <div id="playerCircle" class="player-circle"></div>
-
-    <div class="turnbar">
-      <div id="turnInfo" class="turnbadge">Waiting…</div>
-    </div>
 
     <div class="my-hand-wrapper">
       <div class="my-hand-title">自分のカード</div>
@@ -743,6 +723,10 @@ function getPlayerNameById(pid){
   return p?.name || (pid ? 'Player' : '—');
 }
 function renderTurnUI(){
+  if (!turnInfo){
+    renderDeck();
+    return;
+  }
   const pid = state.turn?.playerId || null;
 
   if (!pid){
